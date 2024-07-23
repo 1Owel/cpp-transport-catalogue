@@ -50,13 +50,15 @@ class TransportCatalogue {
 	};
 
 	
-	public:
-	std::deque<Stop> Stops_; // Все имеющиеся остановки
-	std::deque<Bus> Buses_; // Автобусы и их маршруты
+	
+	std::deque<Stop> stops_; // Все имеющиеся остановки
+	std::deque<Bus> buses_; // Автобусы и их маршруты
 	std::unordered_map<std::string_view, Stop*> name_to_stop_; // Контейнер для быстрого доступа к остановки по имени
 	std::unordered_map<std::string_view, Bus*> name_to_bus_;
 	std::unordered_map<std::pair<Stop*, Stop*>, double, DistanceHasher, ComparePairStops> distance_;
 	std::unordered_map<std::string_view, std::set<std::string_view>> buses_on_stop_;
+	
+	public:
 
 	double GetDistance(const std::pair<Stop*, Stop*>& stop_pair);
 
@@ -76,5 +78,9 @@ class TransportCatalogue {
 		}
 
 	const std::set<std::string_view>& GetBusesOnStop(const std::string_view name) {return buses_on_stop_.at(name);}
+
+	void AddStop(std::string_view name, Coordinates coord);
+
+	void AddBus(std::string_view name, std::vector<std::string_view> stops);
 
 	};
