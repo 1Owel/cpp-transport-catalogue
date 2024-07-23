@@ -7,6 +7,7 @@
 #include <string_view>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 
 
@@ -14,7 +15,6 @@ struct Stop
 {
 	std::string name;
 	Coordinates coords = {0, 0};
-	std::set<std::string_view> buses_on_stop;
 
 	bool operator==(const Stop& rhs) {
 		return name == rhs.name;
@@ -48,14 +48,33 @@ class TransportCatalogue {
 
 		std::hash<std::string> s_hasher;
 	};
+
+	
 	public:
 	std::deque<Stop> Stops_; // Все имеющиеся остановки
 	std::deque<Bus> Buses_; // Автобусы и их маршруты
 	std::unordered_map<std::string_view, Stop*> name_to_stop_; // Контейнер для быстрого доступа к остановки по имени
 	std::unordered_map<std::string_view, Bus*> name_to_bus_;
 	std::unordered_map<std::pair<Stop*, Stop*>, double, DistanceHasher, ComparePairStops> distance_;
+	std::unordered_map<std::string_view, std::set<std::string_view>> buses_on_stop_;
 
 	double GetDistance(const std::pair<Stop*, Stop*>& stop_pair);
 
 	double GetRouteDistance(const std::string_view bus_name);
+
+	size_t GetRouteSize(const std::string_view bus_name) {return name_to_bus_.at(bus_name)->route.size();}
+
+	size_t UniqueStops(const std::string_view name);
+
+	bool HasBus(const std::string_view bus_name) { return name_to_bus_.find(bus_name) == name_to_bus_.end();}
+
+	bool HasStop(const std::string_view stop_name) {return name_to_stop_.find(stop_name) == name_to_stop_.end();}
+
+	bool IsStopEmpty(const std::string_view name) {
+		if (buses_on_stop_.find(name) == buses_on_stop_.end()) {return true;}
+		return buses_on_stop_.at(name).empty();
+		}
+
+	const std::set<std::string_view>& GetBusesOnStop(const std::string_view name) {return buses_on_stop_.at(name);}
+
 	};

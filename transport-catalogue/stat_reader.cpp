@@ -11,41 +11,42 @@ namespace detail {
         return {lhs, rhs};
     }
 
-    size_t UniqueStops(std::vector<Stop*> stops) {
-        std::unordered_set<Stop*> unique_s;
-        for (const auto& i : stops) {
-            unique_s.emplace(i);
+    void PrintBus(TransportCatalogue& transport_catalogue, const std::string_view bus, std::ostream& output) {
+        using namespace std::literals;
+        if (transport_catalogue.HasBus(bus)) {
+            output << "Bus "s << bus << ": not found\n"s;
+        } else {
+        output << "Bus "s << bus << ": "s 
+        << transport_catalogue.GetRouteSize(bus)
+        << " stops on route, "s 
+        << transport_catalogue.UniqueStops(bus) 
+        << " unique stops, "s << transport_catalogue.GetRouteDistance(bus) << " route length\n"s;
         }
-        return unique_s.size();
+    }
+
+    void PrintStop(TransportCatalogue& transport_catalogue, const std::string_view stop, std::ostream& output) {
+        using namespace std::literals;
+        if (transport_catalogue.HasStop(stop)) {
+            output << "Stop "s << stop << ": not found\n"s;
+        } else if (transport_catalogue.IsStopEmpty(stop)) {
+            output << "Stop "s << stop << ": no buses\n"s;
+        } else {
+            output << "Stop "s << stop << ": buses "s;
+            for (auto& i : transport_catalogue.GetBusesOnStop(stop)) {
+                output << i << ' ';
+            }
+            output << "\n";
+        }
     }
 }
 
 void ParseAndPrintStat(TransportCatalogue& transport_catalogue, std::string_view request,
                        std::ostream& output) {
-    using namespace std::literals;
     auto splited = detail::SplitWithoutSpaces(request);
-    
-    if (splited.first == "Bus"s) {
-        if (transport_catalogue.name_to_bus_.find(splited.second) == transport_catalogue.name_to_bus_.end()) {
-            output << "Bus "s << splited.second << ": not found\n"s;
-        } else {
-        output << splited.first << " "s << splited.second << ": "s 
-        << transport_catalogue.name_to_bus_.at(splited.second)->route.size() 
-        << " stops on route, "s 
-        << detail::UniqueStops(transport_catalogue.name_to_bus_.at(splited.second)->route) 
-        << " unique stops, "s << transport_catalogue.GetRouteDistance(splited.second) << " route length\n"s;
-        }
-    } else if (splited.first == "Stop"s) {
-        if (transport_catalogue.name_to_stop_.find(splited.second) == transport_catalogue.name_to_stop_.end()) {
-            output << "Stop "s << splited.second << ": not found\n"s;
-        } else if (transport_catalogue.name_to_stop_.at(splited.second)->buses_on_stop.empty()) {
-            output << "Stop "s << splited.second << ": no buses\n"s;
-        } else {
-            output << "Stop "s << splited.second << ": buses "s;
-            for (auto& i : transport_catalogue.name_to_stop_.at(splited.second)->buses_on_stop) {
-                output << i << ' ';
-            }
-            output << "\n";
-        }
+
+    if (splited.first == "Bus") {
+        detail::PrintBus(transport_catalogue, splited.second, output);
+    } else if (splited.first == "Stop") {
+        detail::PrintStop(transport_catalogue, splited.second, output);
     }
 }

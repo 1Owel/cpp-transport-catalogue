@@ -105,10 +105,7 @@ void InputReader::ParseLine(std::string_view line) {
 void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) const {
     for (auto& i : commands_) {
         if (i.command == "Stop") {
-            {
-            std::set<std::string_view> def;
-            catalogue.Stops_.push_back({move(i.id), ParseCoordinates(i.description), move(def)}); // Создание остановки
-            }
+            catalogue.Stops_.push_back({move(i.id), ParseCoordinates(i.description)}); // Создание остановки
             catalogue.name_to_stop_.emplace(catalogue.Stops_.back().name, &catalogue.Stops_.back()); // Дублирование указателями в unordered_map для быстрого доступа по имени
         }
     }
@@ -120,7 +117,7 @@ void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) 
             }
             for (auto stop_name : ParseRoute(i.description)) {
                 catalogue.Buses_.back().route.push_back(catalogue.name_to_stop_[stop_name]);
-                catalogue.name_to_stop_.at(stop_name)->buses_on_stop.emplace(catalogue.Buses_.back().name); // Добавление str_view имени автобуса который заезжает на остановку
+                catalogue.buses_on_stop_[catalogue.name_to_stop_.at(stop_name)->name].emplace(catalogue.Buses_.back().name); // Добавление str_view имени автобуса который заезжает на остановку
             }
             catalogue.name_to_bus_.emplace(catalogue.Buses_.back().name, &catalogue.Buses_.back());
         }

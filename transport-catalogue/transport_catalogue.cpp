@@ -21,3 +21,11 @@ double TransportCatalogue::GetRouteDistance(const std::string_view bus_name) {
     }
     return result;
 }
+
+    size_t TransportCatalogue::UniqueStops(const std::string_view name) {
+        std::unordered_set<Stop*> unique_s;
+        for (const auto& i : name_to_bus_.at(name)->route) {
+            unique_s.emplace(i);
+        }
+        return unique_s.size();
+    }
