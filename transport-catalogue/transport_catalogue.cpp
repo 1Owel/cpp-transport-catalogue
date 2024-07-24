@@ -1,23 +1,11 @@
 #include "transport_catalogue.h"
 
-double TransportCatalogue::GetDistance(const std::pair<Stop*, Stop*>& stop_pair) {
-    if (distance_.find(stop_pair) == distance_.end()) {
-        distance_[stop_pair] = ComputeDistance(stop_pair.first->coords, stop_pair.second->coords);
-    }
-    return distance_.at(stop_pair);
-}
-
 double TransportCatalogue::GetRouteDistance(const std::string_view bus_name) {
-    double result = 0;
-    auto& lhs = name_to_bus_.at(bus_name)->route.front();
-    bool first = true;
-    for (const auto& rhs : name_to_bus_.at(bus_name)->route) {
-        if (first) {
-            first = false;
-            continue; 
-            }
-        result += GetDistance({lhs, rhs});
-        lhs = rhs;
+    if (name_to_bus_.find(bus_name) == name_to_bus_.end()) {return 0.0;}
+    const auto& route = name_to_bus_.at(bus_name)->route;
+    double result = 0.0;
+    for( size_t i = 1; i <  route.size(); ++i) {
+        result += ComputeDistance(route[i-1]->coords, route[i]->coords);
     }
     return result;
 }
