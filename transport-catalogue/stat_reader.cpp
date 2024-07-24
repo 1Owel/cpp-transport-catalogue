@@ -16,17 +16,18 @@ namespace detail {
         if (transport_catalogue.HasBus(bus)) {
             output << "Bus "s << bus << ": not found\n"s;
         } else {
-        output << "Bus "s << bus << ": "s 
-        << transport_catalogue.GetRouteSize(bus)
-        << " stops on route, "s 
-        << transport_catalogue.UniqueStops(bus) 
-        << " unique stops, "s << transport_catalogue.GetRouteDistance(bus) << " route length\n"s;
+            const auto info = transport_catalogue.GetRouteInfo(bus);
+            output << "Bus "s << info.name << ": "s 
+            << info.all_stops
+            << " stops on route, "s 
+            << info.unique_stops 
+            << " unique stops, "s << info.r_distance << " route length\n"s;
         }
     }
 
     void PrintStop(TransportCatalogue& transport_catalogue, const std::string_view stop, std::ostream& output) {
         using namespace std::literals;
-        if (transport_catalogue.HasStop(stop)) {
+        if (transport_catalogue.HasStop(stop) == nullptr) {
             output << "Stop "s << stop << ": not found\n"s;
         } else if (transport_catalogue.IsStopEmpty(stop)) {
             output << "Stop "s << stop << ": no buses\n"s;

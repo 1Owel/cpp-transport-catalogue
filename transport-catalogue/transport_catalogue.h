@@ -33,6 +33,15 @@ struct Bus
 	std::vector<Stop*> route; // Указатели на остановки (Маршрут для автобуса)
 };
 
+struct RouteInfo
+{
+	std::string_view name;
+	size_t all_stops;
+	size_t unique_stops;
+	double r_distance;
+};
+
+
 class TransportCatalogue {
 	private:
 	struct DistanceHasher {
@@ -49,8 +58,13 @@ class TransportCatalogue {
 		std::hash<std::string> s_hasher;
 	};
 
-	
-	
+	size_t GetRouteSize(const std::string_view bus_name) {
+		if (name_to_bus_.find(bus_name) == name_to_bus_.end()) {return 0;}
+		return name_to_bus_.at(bus_name)->route.size();
+		}
+
+	size_t UniqueStops(const std::string_view name);
+
 	std::deque<Stop> stops_; // Все имеющиеся остановки
 	std::deque<Bus> buses_; // Автобусы и их маршруты
 	std::unordered_map<std::string_view, Stop*> name_to_stop_; // Контейнер для быстрого доступа к остановки по имени
@@ -64,13 +78,12 @@ class TransportCatalogue {
 
 	double GetRouteDistance(const std::string_view bus_name);
 
-	size_t GetRouteSize(const std::string_view bus_name) {return name_to_bus_.at(bus_name)->route.size();}
-
-	size_t UniqueStops(const std::string_view name);
-
 	bool HasBus(const std::string_view bus_name) { return name_to_bus_.find(bus_name) == name_to_bus_.end();}
 
-	bool HasStop(const std::string_view stop_name) {return name_to_stop_.find(stop_name) == name_to_stop_.end();}
+	Stop* HasStop(const std::string_view stop_name) {
+		if (name_to_stop_.find(stop_name) == name_to_stop_.end()) {return nullptr;}
+		return name_to_stop_[stop_name];
+		}
 
 	bool IsStopEmpty(const std::string_view name) {
 		if (buses_on_stop_.find(name) == buses_on_stop_.end()) {return true;}
@@ -79,8 +92,10 @@ class TransportCatalogue {
 
 	const std::set<std::string_view>& GetBusesOnStop(const std::string_view name) {return buses_on_stop_.at(name);}
 
-	void AddStop(std::string_view name, Coordinates coord);
+	void AddStop(std::string_view name, const Coordinates& coord);
 
-	void AddBus(std::string_view name, std::vector<std::string_view> stops);
+	void AddBus(std::string_view name, const std::vector<std::string_view>& stops);
+
+	RouteInfo GetRouteInfo(const std::string_view bus_name);
 
 	};

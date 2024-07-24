@@ -30,12 +30,12 @@ size_t TransportCatalogue::UniqueStops(const std::string_view name) {
     return unique_s.size();
 }
 
-void TransportCatalogue::AddStop(std::string_view name, Coordinates coord) {
+void TransportCatalogue::AddStop(std::string_view name, const Coordinates& coord) {
     stops_.push_back({move(static_cast<std::string>(name)), coord}); // Создание остановки
     name_to_stop_.emplace(stops_.back().name, &stops_.back()); // Дублирование указателями в unordered_map для быстрого доступа по имени
 }
 
-	void TransportCatalogue::AddBus(std::string_view name, std::vector<std::string_view> stops) {
+	void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::string_view>& stops) {
         {
         std::vector<Stop*> def;
         buses_.push_back({move(static_cast<std::string>(name)), move(def)});
@@ -45,4 +45,8 @@ void TransportCatalogue::AddStop(std::string_view name, Coordinates coord) {
             buses_on_stop_[name_to_stop_.at(stop_name)->name].emplace(buses_.back().name); // Добавление str_view имени автобуса который заезжает на остановку
         }
         name_to_bus_.emplace(buses_.back().name, &buses_.back());
+    }
+
+	RouteInfo TransportCatalogue::GetRouteInfo(const std::string_view bus_name) {
+        return {bus_name, GetRouteSize(bus_name), UniqueStops(bus_name), GetRouteDistance(bus_name)};
     }
