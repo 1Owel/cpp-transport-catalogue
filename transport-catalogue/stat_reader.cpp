@@ -13,7 +13,8 @@ namespace detail {
 
     void PrintBus(TransportCatalogue& transport_catalogue, const std::string_view bus, std::ostream& output) {
         using namespace std::literals;
-        if (transport_catalogue.HasBus(bus)) {
+        const auto bus_pointer = transport_catalogue.HasBus(bus);
+        if (bus_pointer == nullptr) {
             output << "Bus "s << bus << ": not found\n"s;
         } else {
             const auto info = transport_catalogue.GetRouteInfo(bus);
@@ -29,7 +30,7 @@ namespace detail {
         using namespace std::literals;
         if (transport_catalogue.HasStop(stop) == nullptr) {
             output << "Stop "s << stop << ": not found\n"s;
-        } else if (transport_catalogue.IsStopEmpty(stop)) {
+        } else if (transport_catalogue.GetBusesOnStop(stop).empty()) {
             output << "Stop "s << stop << ": no buses\n"s;
         } else {
             output << "Stop "s << stop << ": buses "s;

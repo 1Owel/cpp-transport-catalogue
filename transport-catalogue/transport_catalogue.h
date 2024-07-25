@@ -44,26 +44,14 @@ struct RouteInfo
 
 class TransportCatalogue {
 	private:
-	struct DistanceHasher {
-		size_t operator() (const std::pair<Stop*, Stop*> stop_pair) const {
-			size_t zeroes = 1;
-			for (size_t i = 0; i < stop_pair.first->name.size(); i++)
-			{
-				zeroes = zeroes * 100;
-			}
 
-			return s_hasher(stop_pair.first->name) + (s_hasher(stop_pair.second->name) + zeroes);
+	size_t GetRouteSize(const Bus* bus_pointer) {
+		return bus_pointer->route.size();
 		}
 
-		std::hash<std::string> s_hasher;
-	};
+	size_t UniqueStops(const Bus* bus_pointer);
 
-	size_t GetRouteSize(const std::string_view bus_name) {
-		if (name_to_bus_.find(bus_name) == name_to_bus_.end()) {return 0;}
-		return name_to_bus_.at(bus_name)->route.size();
-		}
-
-	size_t UniqueStops(const std::string_view name);
+	double GetRouteDistance(const Bus* bus_p);
 
 	std::deque<Stop> stops_; // Все имеющиеся остановки
 	std::deque<Bus> buses_; // Автобусы и их маршруты
@@ -73,26 +61,37 @@ class TransportCatalogue {
 	
 	public:
 
-	double GetRouteDistance(const std::string_view bus_name);
-
-	bool HasBus(const std::string_view bus_name) { return name_to_bus_.find(bus_name) == name_to_bus_.end();}
+	Bus* HasBus(const std::string_view bus_name) {
+		const auto bus = name_to_bus_.find(bus_name);
+		if (bus == name_to_bus_.end()) {return nullptr;}
+		return bus->second;
+		}
 
 	Stop* HasStop(const std::string_view stop_name) {
-		if (name_to_stop_.find(stop_name) == name_to_stop_.end()) {return nullptr;}
-		return name_to_stop_[stop_name];
+		const auto stop = name_to_stop_.find(stop_name);
+		if (stop == name_to_stop_.end()) {return nullptr;}
+		return stop->second;
 		}
 
-	bool IsStopEmpty(const std::string_view name) {
-		if (buses_on_stop_.find(name) == buses_on_stop_.end()) {return true;}
-		return buses_on_stop_.at(name).empty();
+	const std::set<std::string_view>& GetBusesOnStop(const std::string_view name) {
+		const auto check = buses_on_stop_.find(name);
+		if (check == buses_on_stop_.end()) {
+			static std::set<std::string_view> def = {};
+			return def;
 		}
-
-	const std::set<std::string_view>& GetBusesOnStop(const std::string_view name) {return buses_on_stop_.at(name);}
+		return check->second;
+		}
 
 	void AddStop(std::string_view name, const Coordinates& coord);
 
 	void AddBus(std::string_view name, const std::vector<std::string_view>& stops);
 
 	RouteInfo GetRouteInfo(const std::string_view bus_name);
+	// Попробовал сделать методы для GetRouteInfo через указатели, чтобы каждый метод используемый
+	// внутри GetRouteInfo не искал объект по имени, для этого две функции, с указателем сразу
+	// и еще одна где используеться HasBus. Получаеться что поиск по имени должен быть один за одно
+	// использование функции.
+	RouteInfo GetRouteInfo(const Bus* busp);
+
 
 	};
