@@ -22,7 +22,7 @@ namespace detail {
             << info.all_stops
             << " stops on route, "s 
             << info.unique_stops 
-            << " unique stops, "s << info.r_distance << " route length\n"s;
+            << " unique stops, "s << info.r_distance << " route length, " << info.curvature << " curvature\n"s;
         }
     }
 

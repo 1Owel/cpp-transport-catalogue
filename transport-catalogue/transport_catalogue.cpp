@@ -1,5 +1,20 @@
 #include "transport_catalogue.h"
 
+unsigned int TransportCatalogue::GetRouteDistanceM(const Bus* bus_p) {
+    if (bus_p == nullptr) {return 0;}
+    unsigned int result = 0;
+    for( size_t i = 1; i <  bus_p->route.size(); ++i) {
+        auto dist = distance_.find({bus_p->route[i-1], bus_p->route[i]});
+        if (dist != distance_.end()) {
+            result += dist->second;
+        } else {
+            dist = distance_.find({bus_p->route[i], bus_p->route[i-1]});
+            result += dist->second;
+        }
+    }
+    return result;
+}
+
 double TransportCatalogue::GetRouteDistance(const Bus* bus_p) {
     if (bus_p == nullptr) {return 0.0;}
     double result = 0.0;
@@ -34,11 +49,21 @@ void TransportCatalogue::AddStop(std::string_view name, const Coordinates& coord
         name_to_bus_.emplace(buses_.back().name, &buses_.back());
     }
 
+    void TransportCatalogue::AddDistance(std::string_view stop1, std::unordered_map<std::string_view, unsigned int> distances) {
+        Stop* stop_ptr = name_to_stop_.at(stop1);
+        for (auto i : distances) {
+            std::pair<Stop*, Stop*> key_stops = {stop_ptr, name_to_stop_.at(i.first)};
+            distance_.emplace(move(key_stops), i.second);
+        }
+    }
+
 	RouteInfo TransportCatalogue::GetRouteInfo(const std::string_view bus_name) {
         const Bus* bus_pointer = HasBus(bus_name);
-        return {bus_name, GetRouteSize(bus_pointer), UniqueStops(bus_pointer), GetRouteDistance(bus_pointer)};
+        const auto real_dist = GetRouteDistanceM(bus_pointer);
+        return {bus_name, GetRouteSize(bus_pointer), UniqueStops(bus_pointer), real_dist, real_dist / GetRouteDistance(bus_pointer)};
     }
 
 	RouteInfo TransportCatalogue::GetRouteInfo(const Bus* busp) {
-        return {busp->name, GetRouteSize(busp), UniqueStops(busp), GetRouteDistance(busp)};
+        const auto real_dist = GetRouteDistanceM(busp);
+        return {busp->name, GetRouteSize(busp), UniqueStops(busp), real_dist, real_dist / GetRouteDistance(busp)};
     }

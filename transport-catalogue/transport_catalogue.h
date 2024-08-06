@@ -38,12 +38,27 @@ struct RouteInfo
 	std::string_view name;
 	size_t all_stops;
 	size_t unique_stops;
-	double r_distance;
+	unsigned int r_distance;
+	double curvature;
 };
 
 
 class TransportCatalogue {
 	private:
+
+	struct DistanceHasher {
+		size_t operator() (const std::pair<Stop*, Stop*> stop_pair) const {
+			size_t zeroes = 1;
+			for (size_t i = 0; i < stop_pair.first->name.size(); i++)
+			{
+				zeroes = zeroes * 100;
+			}
+
+			return s_hasher(stop_pair.first->name) + (s_hasher(stop_pair.second->name) + zeroes);
+		}
+
+		std::hash<std::string> s_hasher;
+	};
 
 	size_t GetRouteSize(const Bus* bus_pointer) {
 		return bus_pointer->route.size();
@@ -53,11 +68,14 @@ class TransportCatalogue {
 
 	double GetRouteDistance(const Bus* bus_p);
 
+	unsigned int GetRouteDistanceM(const Bus* bus_p);
+
 	std::deque<Stop> stops_; // Все имеющиеся остановки
 	std::deque<Bus> buses_; // Автобусы и их маршруты
 	std::unordered_map<std::string_view, Stop*> name_to_stop_; // Контейнер для быстрого доступа к остановки по имени
 	std::unordered_map<std::string_view, Bus*> name_to_bus_;
 	std::unordered_map<std::string_view, std::set<std::string_view>> buses_on_stop_;
+	std::unordered_map<std::pair<Stop*, Stop*>, unsigned int, DistanceHasher, ComparePairStops> distance_;
 	
 	public:
 
@@ -85,6 +103,8 @@ class TransportCatalogue {
 	void AddStop(std::string_view name, const Coordinates& coord);
 
 	void AddBus(std::string_view name, const std::vector<std::string_view>& stops);
+
+	void AddDistance(std::string_view stop1, std::unordered_map<std::string_view, unsigned int> distances);
 
 	RouteInfo GetRouteInfo(const std::string_view bus_name);
 	// Попробовал сделать методы для GetRouteInfo через указатели, чтобы каждый метод используемый
