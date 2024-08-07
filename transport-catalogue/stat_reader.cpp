@@ -8,6 +8,7 @@ namespace detail {
         spos = str.find_first_not_of(' ', pos);
         pos = str.find_last_not_of(' ');
         std::string_view rhs = str.substr(spos, pos);
+        rhs = rhs.substr(0, rhs.find_last_not_of(' ') + 1);
         return {lhs, rhs};
     }
 
