@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geo.h"
+#include "domain.h"
 
 #include <deque>
 #include <string>
@@ -9,38 +9,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
-
-
-struct Stop
-{
-	std::string name;
-	Coordinates coords = {0, 0};
-
-	bool operator==(const Stop& rhs) {
-		return name == rhs.name;
-	}
-};
-
-struct ComparePairStops {
- bool operator()(const std::pair<Stop*, Stop*>& lhs, const std::pair<Stop*, Stop*>& rhs) const {
-	return (lhs.first == rhs.first) && (lhs.second == rhs.second);
- }
-};
-
-struct Bus
-{
-	std::string name; // Название автобуса
-	std::vector<Stop*> route; // Указатели на остановки (Маршрут для автобуса)
-};
-
-struct RouteInfo
-{
-	std::string_view name;
-	size_t all_stops;
-	size_t unique_stops;
-	unsigned int r_distance;
-	double curvature;
-};
 
 
 class TransportCatalogue {
