@@ -1,5 +1,8 @@
 #pragma once
 
+#include "transport_catalogue.h"
+
+
 /*
  * Здесь можно было бы разместить код обработчика запросов к базе, содержащего логику, которую не
  * хотелось бы помещать ни в transport_catalogue, ни в json reader.
