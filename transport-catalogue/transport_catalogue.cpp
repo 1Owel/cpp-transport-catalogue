@@ -59,6 +59,7 @@ void TransportCatalogue::AddStop(std::string_view name, const Coordinates& coord
 
 	RouteInfo TransportCatalogue::GetRouteInfo(const std::string_view bus_name) {
         const Bus* bus_pointer = HasBus(bus_name);
+        if (bus_pointer == nullptr) {return {};}
         const auto real_dist = GetRouteDistanceM(bus_pointer);
         return {bus_name, GetRouteSize(bus_pointer), UniqueStops(bus_pointer), real_dist, real_dist / GetRouteDistance(bus_pointer)};
     }

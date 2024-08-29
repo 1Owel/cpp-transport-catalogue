@@ -15,6 +15,13 @@
     },
     {
       "type": "Stop",
+      "name": "абоба",
+      "latitude": 43.587795,
+      "longitude": 39.716901,
+      "road_distances": {"Морской вокзал": 1}
+    },
+    {
+      "type": "Stop",
       "name": "Морской вокзал",
       "latitude": 43.581969,
       "longitude": 39.719848,
@@ -23,6 +30,7 @@
   ],
   "stat_requests": [
     { "id": 1, "type": "Stop", "name": "Ривьерский мост" },
-    { "id": 2, "type": "Bus", "name": "114" }
+    { "id": 2, "type": "Stop", "name": "абоба" },
+    { "id": 3, "type": "Bus", "name": "114" }
   ]
-}
+} 
