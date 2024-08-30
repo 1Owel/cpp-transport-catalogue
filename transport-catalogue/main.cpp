@@ -12,5 +12,4 @@ int main() {
     ifstream file("tests.txt");
 
     JSONToTransport(file, catalogue, cout);
-
 }

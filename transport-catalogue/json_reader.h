@@ -20,8 +20,8 @@ void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, co
 void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node, std::ostream& out);
 
 inline void JSONToTransport(std::istream& in, TransportCatalogue& catalogue, std::ostream& out) {
-    auto json_querry = json::Load(in);
-    ApplyCommandsFromVariant(catalogue, json_querry.GetRoot(), out);
+    auto json_query = json::Load(in);
+    ApplyCommandsFromVariant(catalogue, json_query.GetRoot(), out);
 }
 
     /*
