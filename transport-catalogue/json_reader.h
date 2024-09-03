@@ -3,6 +3,7 @@
 #include "json.h"
 #include "transport_catalogue.h"
 #include "request_handler.h"
+#include "map_renderer.h"
 
 #include <iostream>
 #include <variant>

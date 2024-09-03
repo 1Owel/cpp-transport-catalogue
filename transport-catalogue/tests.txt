@@ -2,35 +2,73 @@
   "base_requests": [
     {
       "type": "Bus",
+      "name": "14",
+      "stops": [
+        "Ulitsa Lizy Chaikinoi",
+        "Elektroseti",
+        "Ulitsa Dokuchaeva",
+        "Ulitsa Lizy Chaikinoi"
+      ],
+      "is_roundtrip": true
+    },
+    {
+      "type": "Bus",
       "name": "114",
-      "stops": ["Морской вокзал", "Ривьерский мост"],
+      "stops": [
+        "Morskoy vokzal",
+        "Rivierskiy most"
+      ],
       "is_roundtrip": false
     },
     {
       "type": "Stop",
-      "name": "Ривьерский мост",
+      "name": "Rivierskiy most",
       "latitude": 43.587795,
       "longitude": 39.716901,
-      "road_distances": {"Морской вокзал": 850}
+      "road_distances": {
+        "Morskoy vokzal": 850
+      }
     },
     {
       "type": "Stop",
-      "name": "абоба",
-      "latitude": 43.587795,
-      "longitude": 39.716901,
-      "road_distances": {"Морской вокзал": 1}
-    },
-    {
-      "type": "Stop",
-      "name": "Морской вокзал",
+      "name": "Morskoy vokzal",
       "latitude": 43.581969,
       "longitude": 39.719848,
-      "road_distances": {"Ривьерский мост": 850}
+      "road_distances": {
+        "Rivierskiy most": 850
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Elektroseti",
+      "latitude": 43.598701,
+      "longitude": 39.730623,
+      "road_distances": {
+        "Ulitsa Dokuchaeva": 3000,
+        "Ulitsa Lizy Chaikinoi": 4300
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Ulitsa Dokuchaeva",
+      "latitude": 43.585586,
+      "longitude": 39.733879,
+      "road_distances": {
+        "Ulitsa Lizy Chaikinoi": 2000,
+        "Elektroseti": 3000
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Ulitsa Lizy Chaikinoi",
+      "latitude": 43.590317,
+      "longitude": 39.746833,
+      "road_distances": {
+        "Elektroseti": 4300,
+        "Ulitsa Dokuchaeva": 2000
+      }
     }
   ],
   "stat_requests": [
-    { "id": 1, "type": "Stop", "name": "Ривьерский мост" },
-    { "id": 2, "type": "Stop", "name": "абоба" },
-    { "id": 3, "type": "Bus", "name": "114" }
   ]
-} 
+}

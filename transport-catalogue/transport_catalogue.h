@@ -47,6 +47,8 @@ class TransportCatalogue {
 	
 	public:
 
+	const std::deque<Bus>& GetAllBuses() const { return buses_; }
+
 	Bus* HasBus(const std::string_view bus_name) {
 		const auto bus = name_to_bus_.find(bus_name);
 		if (bus == name_to_bus_.end()) {return nullptr;}
