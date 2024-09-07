@@ -38,13 +38,23 @@ svg::Polyline BusToPolyline(const Bus& bus, const RenderSettings& settings, Sphe
     return route;
 }
 
-std::map<std::string_view, svg::Color> GetColoredBuses(const std::deque<Bus>& buses,
+struct BusLexCompare {
+    bool operator()(const Bus* s1, const Bus* s2) const {
+        return std::lexicographical_compare(s1->name.begin(), s1->name.end(), s2->name.begin(), s2->name.end());
+    }
+};
+
+std::map<const Bus*, svg::Color, BusLexCompare> GetColoredBuses(const std::deque<Bus>& buses,
 const std::vector<svg::Color>& colors) { // Вернет Map с цветами из colors
-    std::map<std::string_view, svg::Color> colored_buses;
-    auto color_it = colors.begin();
+    std::map<const Bus*, svg::Color, BusLexCompare> colored_buses;
     for (const auto& bus : buses) {
-        colored_buses[bus.name] = *color_it;
-        if (!bus.route.empty()) {
+        const Bus* b = &bus;
+        colored_buses[b] = {};
+    }
+    auto color_it = colors.begin();
+    for (auto& bus : colored_buses) {
+        bus.second = *color_it;
+        if (!bus.first->route.empty()) {
             ++color_it;
             if (color_it == colors.end()) { // Проверка не нужна если маршрут пустой, так как цвет остаеться тем же
                 color_it = colors.begin();
@@ -55,12 +65,15 @@ const std::vector<svg::Color>& colors) { // Вернет Map с цветами �
 }
 
 void RenderAllRoutes(const std::deque<Bus>& buses, const RenderSettings& settings, std::ostream& out) {
-    const std::map<std::string_view, svg::Color> colored_buses = GetColoredBuses(buses, settings.color_palette); // Название маршрута \ цвет
+    const std::map<const Bus*, svg::Color, BusLexCompare> colored_buses = GetColoredBuses(buses, settings.color_palette); // Название маршрута \ цвет
     svg::Document picture; // Картина / карта
     const std::vector<Coordinates> all_stops_cords = GetAllStopsCoords(buses); // Координаты всех остановок, нужны для конвертации координат на полотно картинки
     SphereProjector projector(all_stops_cords.begin(), all_stops_cords.end(), settings.width, settings.height, settings.padding); // Форматирует координаты geo в svg::Point оператором ()
-    for (const auto& bus : buses) {
-        picture.Add(BusToPolyline(bus, settings, projector, colored_buses.at(bus.name)));
+
+    for (const auto& bus : colored_buses) {
+        if (!bus.first->route.empty()) {
+            picture.Add(BusToPolyline(*bus.first, settings, projector, bus.second));
+        }
     }
     picture.Render(out);
 }

@@ -16,25 +16,15 @@ using Array = std::vector<Node>;
 using NodeValue = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
 */
 
-void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node, std::ostream& output);
+void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node);
 
 void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node, std::ostream& out);
 
-inline void JSONToTransport(std::istream& in, TransportCatalogue& catalogue, std::ostream& out) {
+void GetJSONRenderSettings(const json::Node& node, RenderSettings& settings);
+
+inline json::Document JSONToTransport(std::istream& in, TransportCatalogue& catalogue, RenderSettings& settings) {
     auto json_query = json::Load(in);
-    ApplyCommandsFromVariant(catalogue, json_query.GetRoot(), out);
+    GetJSONRenderSettings(json_query.GetRoot(), settings);
+    ApplyCommandsFromVariant(catalogue, json_query.GetRoot());
+    return json_query;
 }
-
-    /*
-     * Примерная структура программы:
-     *
-     * Считать JSON из stdin
-     * Построить на его основе JSON базу данных транспортного справочника
-     * Выполнить запросы к справочнику, находящиеся в массива "stat_requests", построив JSON-массив
-     * с ответами Вывести в stdout ответы в виде JSON
-     */
-
-/*
- * Здесь можно разместить код наполнения транспортного справочника данными из JSON,
- * а также код обработки запросов к базе и формирование массива ответов в формате JSON
- */

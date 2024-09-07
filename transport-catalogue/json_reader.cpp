@@ -86,10 +86,12 @@ inline json::Dict GetBusAnswr([[maybe_unused]] TransportCatalogue& catalogue, co
     answr["request_id"] = query.at("id");
     return answr;
 }
+
 // Выводит ответ на запрос в формате JSON
 void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node, std::ostream& out) {
     using Array = std::vector<json::Node>;
     using namespace std::literals;
+    if (node.AsMap().at("stat_requests").AsArray().empty()) {return;}
 
     Array result;
     for (const auto& request : (node.AsMap().at("stat_requests")).AsArray()) {
@@ -101,9 +103,10 @@ void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const json::N
         }
     }
     json::Print(json::Document(json::Node(result)), out);
+    out << std::endl;
 }
 
-void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node, std::ostream& output) {
+void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node) {
     // Добавление остановок без дистанции до других остановок
     for (const auto& request : (node.AsMap().at("base_requests")).AsArray()) {
         AddStopWithoutDist(catalogue, request);
@@ -116,6 +119,49 @@ void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, co
     for (const auto& request : (node.AsMap().at("base_requests")).AsArray()) {
         AddBusFromNode(catalogue, request);
     }
-    // Читает запрос к каталогу и выводит ответ в output
-    GetJSONAnswer(catalogue, node, output);
+
+}
+
+// Чтение цвета из ноды
+svg::Color ReadColor(const json::Node& node) {
+    if (node.IsArray()) {
+        const auto& arr = node.AsArray();
+        if (arr.size() == 3) {
+            return svg::Rgb(static_cast<uint8_t>(arr[0].AsInt()), static_cast<uint8_t>(arr[1].AsInt()), static_cast<uint8_t>(arr[2].AsInt()));
+        } else {
+            return svg::Rgba(static_cast<uint8_t>(arr[0].AsInt()), static_cast<uint8_t>(arr[1].AsInt()), static_cast<uint8_t>(arr[2].AsInt()), (arr[3].AsDouble()));
+        }
+    } else if (node.IsString()) {
+        return node.AsString();
+    }
+    return svg::NoneColor;
+}
+
+// Заполнение палитры
+std::vector<svg::Color> ReadColorPalette(const json::Node& node) {
+    auto& json_palate = node.AsArray();
+    std::vector<svg::Color> color_palette;
+    for (auto& i : json_palate) {
+        color_palette.push_back(ReadColor(i));
+    }
+    return color_palette;
+}
+
+// Чтение параметров рендера
+void GetJSONRenderSettings(const json::Node& node, RenderSettings& settings) {
+    const auto& settings_map = node.AsMap().at("render_settings").AsMap();
+    settings.width = settings_map.at("width").AsDouble();
+    settings.height = settings_map.at("height").AsDouble();
+    settings.padding = settings_map.at("padding").AsDouble();
+    settings.stop_radius = settings_map.at("stop_radius").AsDouble();
+    settings.line_width = settings_map.at("line_width").AsDouble();
+    settings.bus_label_font_size = settings_map.at("bus_label_font_size").AsInt();
+    settings.bus_label_offset = {settings_map.at("bus_label_offset").AsArray()[0].AsDouble()
+    , settings_map.at("bus_label_offset").AsArray()[1].AsDouble()};
+    settings.stop_label_font_size = settings_map.at("stop_label_font_size").AsInt();
+    settings.stop_label_offset = {settings_map.at("stop_label_offset").AsArray()[0].AsDouble()
+    , settings_map.at("stop_label_offset").AsArray()[1].AsDouble()};
+    settings.underlayer_color = ReadColor(settings_map.at("underlayer_color"));
+    settings.underlayer_width = settings_map.at("underlayer_width").AsDouble();
+    settings.color_palette = ReadColorPalette(settings_map.at("color_palette"));
 }
