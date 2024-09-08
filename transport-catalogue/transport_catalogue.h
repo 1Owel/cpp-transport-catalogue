@@ -72,7 +72,7 @@ class TransportCatalogue {
 
 	void AddStop(std::string_view name, const Coordinates& coord);
 
-	void AddBus(std::string_view name, const std::vector<std::string_view>& stops);
+	void AddBus(std::string_view name, const std::vector<std::string_view>& stops, bool roundtrip);
 
 	void AddDistance(std::string_view stop1, std::unordered_map<std::string_view, unsigned int> distances);
 

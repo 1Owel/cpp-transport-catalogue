@@ -46,7 +46,7 @@ void AddBusFromNode([[maybe_unused]] TransportCatalogue& catalogue, const json::
                 ++rit;
             }
         }
-        catalogue.AddBus(mreq.at("name").AsString(), stops);
+        catalogue.AddBus(mreq.at("name").AsString(), stops, mreq.at("is_roundtrip").AsBool());
     }
 }
 

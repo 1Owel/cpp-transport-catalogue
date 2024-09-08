@@ -37,10 +37,10 @@ void TransportCatalogue::AddStop(std::string_view name, const Coordinates& coord
     name_to_stop_.emplace(stops_.back().name, &stops_.back()); // Дублирование указателями в unordered_map для быстрого доступа по имени
 }
 
-	void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::string_view>& stops) {
+	void TransportCatalogue::AddBus(std::string_view name, const std::vector<std::string_view>& stops, bool roundtrip) {
         {
         std::vector<Stop*> def;
-        buses_.push_back({move(static_cast<std::string>(name)), move(def)});
+        buses_.push_back({move(static_cast<std::string>(name)), move(def), roundtrip});
         }
         for (const auto& stop_name : stops) {
             buses_.back().route.push_back(name_to_stop_[stop_name]);

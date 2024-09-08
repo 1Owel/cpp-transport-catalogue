@@ -24,6 +24,7 @@ struct Bus
 {
 	std::string name; // Название автобуса
 	std::vector<Stop*> route; // Указатели на остановки (Маршрут для автобуса)
+	bool roundtrip;
 };
 
 struct RouteInfo

@@ -10,13 +10,13 @@ using namespace std;
 
 int main() {
     TransportCatalogue catalogue;
-    ifstream file("in.txt");
-    ofstream output("output.txt");
+    ifstream file("tests.txt");
+    ofstream out("out.svg");
 
     RenderSettings settings;
 
     const auto querry = JSONToTransport(file, catalogue, settings);
 
-    RenderAllRoutes(catalogue.GetAllBuses(), settings, output);
+    RenderAllRoutes(catalogue.GetAllBuses(), settings, out);
 
 }
