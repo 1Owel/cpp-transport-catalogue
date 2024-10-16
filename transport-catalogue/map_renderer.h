@@ -7,6 +7,7 @@
 #include <optional>
 #include <vector>
 #include <map>
+#include <set>
 
 #include "svg.h"
 #include "geo.h"

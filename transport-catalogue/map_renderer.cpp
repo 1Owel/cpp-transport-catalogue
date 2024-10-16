@@ -44,6 +44,12 @@ struct BusLexCompare {
     }
 };
 
+struct StopLexCompare {
+    bool operator()(const Stop* s1, const Stop* s2) const {
+        return s1->name < s2->name;
+    }
+};
+
 std::map<const Bus*, svg::Color, BusLexCompare> GetColoredBuses(const std::deque<Bus>& buses,
 const std::vector<svg::Color>& colors) { // Вернет Map с цветами из colors
     std::map<const Bus*, svg::Color, BusLexCompare> colored_buses;
@@ -111,6 +117,7 @@ void RenderAllRoutes(const std::deque<Bus>& buses, const RenderSettings& setting
             picture.Add(BusToPolyline(*bus.first, settings, projector, bus.second));
         }
     }
+
     // Пишет названия маршрута у конечных остановок
     for (const auto& bus : colored_buses) {
         if (!bus.first->route.empty()) {
@@ -129,5 +136,22 @@ void RenderAllRoutes(const std::deque<Bus>& buses, const RenderSettings& setting
             }
         }
     }
+
+    // Наносит на полотно кружки обозначающие остановки
+    std::set<Stop*, StopLexCompare> stops_sorted; // Остановки для вывода на полотно
+    // Заполнение контейнера stops_sorted
+    for (auto& bus : buses) {
+        stops_sorted.insert(bus.route.begin(), bus.route.end());
+    }
+    for (auto& stop : stops_sorted) {
+        // Создание окружности-остановки
+        svg::Circle circle;
+        circle.SetCenter(projector(stop->coords));
+        circle.SetFillColor("white");
+        circle.SetRadius(settings.stop_radius);
+        // Добавление окружности-остановки на холст
+        picture.Add(circle);
+    }
+
     picture.Render(out);
 }
