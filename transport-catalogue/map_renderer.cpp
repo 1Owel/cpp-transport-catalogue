@@ -143,6 +143,7 @@ void RenderAllRoutes(const std::deque<Bus>& buses, const RenderSettings& setting
     for (auto& bus : buses) {
         stops_sorted.insert(bus.route.begin(), bus.route.end());
     }
+
     for (auto& stop : stops_sorted) {
         // Создание окружности-остановки
         svg::Circle circle;
@@ -151,6 +152,29 @@ void RenderAllRoutes(const std::deque<Bus>& buses, const RenderSettings& setting
         circle.SetRadius(settings.stop_radius);
         // Добавление окружности-остановки на холст
         picture.Add(circle);
+    }
+
+    // Добавлениие названий остановок
+    for (auto& stop : stops_sorted) {
+        svg::Text outline;
+        // Общие параметры для обводки и текста
+        outline.SetPosition(projector(stop->coords));
+        outline.SetOffset({settings.stop_label_offset.first, settings.stop_label_offset.second });
+        outline.SetFontFamily("Verdana");
+        outline.SetFontSize(static_cast<uint32_t>(settings.stop_label_font_size));
+        outline.SetData(stop->name);
+        // Основной текст - Название остановки
+        svg::Text stop_name(outline);
+        stop_name.SetFillColor("black");
+        // Параметры обводки
+        outline.SetFillColor(settings.underlayer_color);
+        outline.SetStrokeColor(settings.underlayer_color);
+        outline.SetStrokeWidth(settings.underlayer_width);
+        outline.SetStrokeLineCap(svg::StrokeLineCap::ROUND);
+        outline.SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
+
+        picture.Add(outline);
+        picture.Add(stop_name);
     }
 
     picture.Render(out);
