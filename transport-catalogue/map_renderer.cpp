@@ -46,7 +46,7 @@ struct BusLexCompare {
 
 struct StopLexCompare {
     bool operator()(const Stop* s1, const Stop* s2) const {
-        return s1->name < s2->name;
+        return std::lexicographical_compare(s1->name.begin(), s1->name.end(), s2->name.begin(), s2->name.end());
     }
 };
 
@@ -124,7 +124,7 @@ void RenderAllRoutes(const std::deque<Bus>& buses, const RenderSettings& setting
             auto route_text = BusToText(*bus.first, settings, projector, bus.second);
             picture.Add(route_text.second); // Подложка
             picture.Add(route_text.first); // Текст
-            if (!bus.first->roundtrip) { // Добавляет текст у конечной если маршрут не кольцевой
+            if (!bus.first->roundtrip && bus.first->route.front()->name != bus.first->route[bus.first->route.size() / 2]->name) { // Добавляет текст у конечной если маршрут не кольцевой
                 // Смена координат на последнюю остановку
                 Stop* center = bus.first->route.at(bus.first->route.size() / 2);
                 
