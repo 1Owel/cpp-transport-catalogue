@@ -251,6 +251,7 @@ struct PrintContext {
     }
 };
 
+// Экранирование
 // R"("\r\n\t\"\\")"s - to - "\r\n\t\"\\"
 std::string StringTab(const string& str) {
     using namespace std::literals;

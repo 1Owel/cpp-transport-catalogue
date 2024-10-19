@@ -18,7 +18,7 @@ using NodeValue = std::variant<std::nullptr_t, Array, Dict, bool, int, double, s
 
 void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node);
 
-void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node, std::ostream& out);
+void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& settings , const json::Node& node, std::ostream& out);
 
 void GetJSONRenderSettings(const json::Node& node, RenderSettings& settings);
 

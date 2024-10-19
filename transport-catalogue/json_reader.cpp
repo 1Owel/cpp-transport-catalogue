@@ -87,8 +87,18 @@ inline json::Dict GetBusAnswr([[maybe_unused]] TransportCatalogue& catalogue, co
     return answr;
 }
 
+// Формирует и возвращает ответ на запрос типа Map (Карта)
+inline json::Dict GetMapAnswr([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& settings, const json::Dict& query) {
+    json::Dict answr;
+    std::ostringstream map_render;
+    RenderAllRoutes(catalogue.GetAllBuses(), settings, map_render);
+    answr["map"] = map_render.str();
+    answr["request_id"] = query.at("id");
+    return answr;
+}
+
 // Выводит ответ на запрос в формате JSON
-void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node, std::ostream& out) {
+void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& settings, const json::Node& node, std::ostream& out) {
     using Array = std::vector<json::Node>;
     using namespace std::literals;
     if (node.AsMap().at("stat_requests").AsArray().empty()) {return;}
@@ -100,6 +110,8 @@ void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const json::N
             result.push_back(GetStopAnswr(catalogue, query));
         } else if (query.at("type").AsString() == "Bus") {
             result.push_back(GetBusAnswr(catalogue, query));
+        } else if (query.at("type").AsString() == "Map") {
+            result.push_back(GetMapAnswr(catalogue, settings, query));
         }
     }
     json::Print(json::Document(json::Node(result)), out);

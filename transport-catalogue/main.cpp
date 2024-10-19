@@ -17,6 +17,6 @@ int main() {
 
     const auto querry = JSONToTransport(file, catalogue, settings);
 
-    RenderAllRoutes(catalogue.GetAllBuses(), settings, out);
+    GetJSONAnswer(catalogue, settings, querry.GetRoot(), out);
 
 }
