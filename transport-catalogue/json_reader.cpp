@@ -51,70 +51,68 @@ void AddBusFromNode([[maybe_unused]] TransportCatalogue& catalogue, const json::
 }
 
 // Формирует и возвращает ответ на запрос типа Stop (Автобусы на остановке)
-inline json::Dict GetStopAnswr([[maybe_unused]] TransportCatalogue& catalogue, const json::Dict& query) {
+inline void GetStopAnswr([[maybe_unused]] TransportCatalogue& catalogue, const json::Dict& query, json::Builder& result) {
     using namespace std::literals;
     using namespace json;
-    Dict answr;
-    Array buses;
 
     if (!catalogue.HasStop(query.at("name").AsString())) {
-        answr["error_message"] = "not found"s;
+        result.StartDict().Key("error_message").Value("not found");
     } else {
         auto buses_set = catalogue.GetBusesOnStop(query.at("name").AsString());
+        result.StartDict().Key("buses").StartArray();
         for (std::string_view i : buses_set) {
-            buses.push_back(static_cast<std::string>(i.data()));
+            result.Value(static_cast<std::string>(i.data()));
         }
-        answr["buses"] = buses;
+        result.EndArray();
     }
-    answr["request_id"] = json::Node(query.at("id"));
-    return answr;
+    result.Key("request_id").Value(query.at("id").AsInt()).EndDict();
 }
 
 // Формирует и возвращает ответ на запрос типа Bus (Маршрут)
-inline json::Dict GetBusAnswr([[maybe_unused]] TransportCatalogue& catalogue, const json::Dict& query) {
+inline void GetBusAnswr([[maybe_unused]] TransportCatalogue& catalogue, const json::Dict& query, json::Builder& result) {
     using namespace std::literals;
     auto routeinf = catalogue.GetRouteInfo(query.at("name").AsString());
-    json::Dict answr;
     if (routeinf.name.empty()) {
-        answr["error_message"] = "not found"s;
+        result.StartDict().Key("error_message").Value("not found");
     } else {
-        answr["curvature"] = routeinf.curvature;
-        answr["route_length"] = static_cast<int>(routeinf.r_distance);
-        answr["stop_count"] = static_cast<int>(routeinf.all_stops);
-        answr["unique_stop_count"] = static_cast<int>(routeinf.unique_stops);
+        result.StartDict()
+        .Key("curvature").Value(routeinf.curvature)
+        .Key("route_length").Value(static_cast<int>(routeinf.r_distance))
+        .Key("stop_count").Value(static_cast<int>(routeinf.all_stops))
+        .Key("unique_stop_count").Value(static_cast<int>(routeinf.unique_stops));
     }
-    answr["request_id"] = query.at("id");
-    return answr;
+    result.Key("request_id").Value(query.at("id").AsInt()).EndDict();
 }
 
 // Формирует и возвращает ответ на запрос типа Map (Карта)
-inline json::Dict GetMapAnswr([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& settings, const json::Dict& query) {
-    json::Dict answr;
+inline void GetMapAnswr([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& settings, const json::Dict& query, json::Builder& result) {
     std::ostringstream map_render;
     RenderAllRoutes(catalogue.GetAllBuses(), settings, map_render);
-    answr["map"] = map_render.str();
-    answr["request_id"] = query.at("id");
-    return answr;
+    result.StartDict()
+    .Key("map").Value(map_render.str())
+    .Key("request_id").Value(query.at("id").AsInt())
+    .EndDict();
 }
 
 // Выводит ответ на запрос в формате JSON
 void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& settings, const json::Node& node, std::ostream& out) {
-    using Array = std::vector<json::Node>;
     using namespace std::literals;
     if (node.AsMap().at("stat_requests").AsArray().empty()) {return;}
 
-    Array result;
+    json::Builder result;
+    result.StartArray();
     for (const auto& request : (node.AsMap().at("stat_requests")).AsArray()) {
         const auto& query = request.AsMap();
         if (query.at("type").AsString() == "Stop") {
-            result.push_back(GetStopAnswr(catalogue, query));
+            GetStopAnswr(catalogue, query, result);
         } else if (query.at("type").AsString() == "Bus") {
-            result.push_back(GetBusAnswr(catalogue, query));
+            GetBusAnswr(catalogue, query, result);
         } else if (query.at("type").AsString() == "Map") {
-            result.push_back(GetMapAnswr(catalogue, settings, query));
+            GetMapAnswr(catalogue, settings, query, result);
         }
     }
-    json::Print(json::Document(json::Node(result)), out);
+    result.EndArray();
+    json::Print(json::Document(result.Build()), out);
     out << std::endl;
 }
 

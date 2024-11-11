@@ -11,7 +11,7 @@
 namespace json {
 
 class Node;
-// Сохраните объявления Dict и Array без изменения
+
 using Dict = std::map<std::string, Node>;
 using Array = std::vector<Node>;
 
@@ -24,7 +24,10 @@ public:
 
 class Node {
 public:
+    friend class Builder;
     using NodeValue = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
+
+    Node(NodeValue value) : node_(std::move(value)) {}
 
     Node() = default;
     Node(Array node_t) : node_(node_t) {}
@@ -71,6 +74,10 @@ public:
     }
 
 private:
+    NodeValue& GetPureValue() {
+        return node_;
+    }
+
     NodeValue node_ = nullptr;
 };
 

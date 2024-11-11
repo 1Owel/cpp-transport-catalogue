@@ -77,10 +77,7 @@ class TransportCatalogue {
 	void AddDistance(std::string_view stop1, std::unordered_map<std::string_view, unsigned int> distances);
 
 	RouteInfo GetRouteInfo(const std::string_view bus_name);
-	// Попробовал сделать методы для GetRouteInfo через указатели, чтобы каждый метод используемый
-	// внутри GetRouteInfo не искал объект по имени, для этого две функции, с указателем сразу
-	// и еще одна где используеться HasBus. Получаеться что поиск по имени должен быть один за одно
-	// использование функции.
+
 	RouteInfo GetRouteInfo(const Bus* busp);
 
 

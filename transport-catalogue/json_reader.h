@@ -4,17 +4,12 @@
 #include "transport_catalogue.h"
 #include "request_handler.h"
 #include "map_renderer.h"
+#include "json_builder.h"
 
 #include <iostream>
 #include <variant>
 #include <unordered_map>
 
-/*
-using namespace json;
-using Dict = std::map<std::string, Node>;
-using Array = std::vector<Node>;
-using NodeValue = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
-*/
 
 void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node);
 
