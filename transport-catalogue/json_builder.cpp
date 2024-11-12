@@ -2,15 +2,15 @@
 
 namespace json {
 
-    ValueInDictItemContext json::KeyItemContext::Value(Node::NodeValue v) {
+    Builder::ValueInDictItemContext Builder::KeyItemContext::Value(Node::NodeValue v) {
         return ValueInDictItemContext(builder.Value(std::move(v)));
     }
 
-    KeyItemContext json::DictItemContext::Key(std::string key) {
+    Builder::KeyItemContext Builder::DictItemContext::Key(std::string key) {
         return builder.Key(std::move(key));
     }
 
-    KeyItemContext json::Builder::Key(std::string key) {
+    Builder::KeyItemContext json::Builder::Key(std::string key) {
         if (nodes_stack_.empty()) {
             throw std::logic_error("Function call in ended builder");
         }
@@ -46,7 +46,7 @@ namespace json {
         return *this;
     }
 
-    StartArrayItemContext json::Builder::StartArray() {
+    Builder::StartArrayItemContext json::Builder::StartArray() {
         if (nodes_stack_.empty()) {
             throw std::logic_error("Function call in ended builder");
         }
@@ -79,7 +79,7 @@ namespace json {
         return *this;
     }
 
-    DictItemContext json::Builder::StartDict() {
+    Builder::DictItemContext json::Builder::StartDict() {
         if (nodes_stack_.empty()) {
             throw std::logic_error("Function call in ended builder");
         }
