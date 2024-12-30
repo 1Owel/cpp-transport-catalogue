@@ -1,10 +1,3 @@
-#pragma once
-
-#include <variant>
-#include <optional>
-
-#include "transport_catalogue.h"
-
 
 // Класс RequestHandler играет роль Фасада, упрощающего взаимодействие JSON reader-а
 // с другими подсистемами приложения.

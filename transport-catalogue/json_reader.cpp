@@ -94,10 +94,76 @@ inline void GetMapAnswr([[maybe_unused]] TransportCatalogue& catalogue, const Re
     .EndDict();
 }
 
+inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const Routing_settings &settings, const json::Dict &query, json::Builder &result, RouterBuilder& rb)
+{
+    std::string_view from = query.at("from").AsString();
+    std::string_view to = query.at("to").AsString();
+    auto route = rb.BuildRoute(from, to);
+
+    if (!route.has_value())
+    {
+        result.StartDict()
+            .Key("request_id")
+            .Value(query.at("id").AsInt())
+            .Key("error_message")
+            .Value("not found")
+            .EndDict();
+    }
+    else
+    {
+        result.StartDict()
+            .Key("request_id")
+            .Value(query.at("id").AsInt())
+            .Key("total_time")
+            .Value(route->weight)
+            .Key("items")
+            .StartArray();
+        // Заполнить Array с результата работы кода выше, Dict с действиями
+        for (size_t edgeid : route->edges)
+        {
+            EdgeInfo edge = rb.GetEdgeInfo(edgeid);
+            switch (edge.index())
+            {
+            case 0:
+            {
+                BusEdgeInfo info = std::get<BusEdgeInfo>(edge);
+                result.StartDict()
+                    .Key("type")
+                    .Value("Bus")
+                    .Key("bus")
+                    .Value(info.bus_ptr->name)
+                    .Key("span_count")
+                    .Value(static_cast<int>(info.span_count))
+                    .Key("time")
+                    .Value(info.time)
+                    .EndDict();
+                break;
+            }
+            case 1:
+            {
+                WaitEdgeInfo winfo = std::get<WaitEdgeInfo>(edge);
+                result.StartDict()
+                    .Key("type")
+                    .Value("Wait")
+                    .Key("stop_name")
+                    .Value(winfo.wait_place->name)
+                    .Key("time")
+                    .Value(settings.bus_wait_time)
+                    .EndDict();
+                break;
+            }
+            }
+        }
+        result.EndArray().EndDict();
+    }
+}
+
 // Выводит ответ на запрос в формате JSON
-void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& settings, const json::Node& node, std::ostream& out) {
+void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& render_settings, const Routing_settings& routing_setting, const json::Node& node, std::ostream& out) {
     using namespace std::literals;
     if (node.AsMap().at("stat_requests").AsArray().empty()) {return;}
+    GraphBuilder gb(catalogue, routing_setting);
+    RouterBuilder rb(catalogue, gb.GetBuildedGraph(), gb.GetInfoAllEdges());
 
     json::Builder result;
     result.StartArray();
@@ -108,7 +174,9 @@ void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderS
         } else if (query.at("type").AsString() == "Bus") {
             GetBusAnswr(catalogue, query, result);
         } else if (query.at("type").AsString() == "Map") {
-            GetMapAnswr(catalogue, settings, query, result);
+            GetMapAnswr(catalogue, render_settings, query, result);
+        } else if (query.at("type").AsString() == "Route") {
+            GetRouteAnswr(catalogue, routing_setting, query, result, rb);
         }
     }
     result.EndArray();
@@ -174,4 +242,11 @@ void GetJSONRenderSettings(const json::Node& node, RenderSettings& settings) {
     settings.underlayer_color = ReadColor(settings_map.at("underlayer_color"));
     settings.underlayer_width = settings_map.at("underlayer_width").AsDouble();
     settings.color_palette = ReadColorPalette(settings_map.at("color_palette"));
+}
+
+// Чтение параметров для поиска маршрута
+void GetJSONRouting_settings(const json::Node& node, Routing_settings& settings) {
+    const auto& routing_settings = node.AsMap().at("routing_settings").AsMap();
+    settings.bus_velocity = routing_settings.at("bus_velocity").AsDouble();
+    settings.bus_wait_time = routing_settings.at("bus_wait_time").AsInt();
 }

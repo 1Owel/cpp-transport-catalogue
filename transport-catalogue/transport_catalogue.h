@@ -13,7 +13,6 @@
 
 class TransportCatalogue {
 	private:
-
 	struct DistanceHasher {
 		size_t operator() (const std::pair<Stop*, Stop*> stop_pair) const {
 			size_t zeroes = 1;
@@ -30,7 +29,7 @@ class TransportCatalogue {
 
 	size_t GetRouteSize(const Bus* bus_pointer) {
 		return bus_pointer->route.size();
-		}
+	}
 
 	size_t UniqueStops(const Bus* bus_pointer);
 
@@ -47,7 +46,17 @@ class TransportCatalogue {
 	
 	public:
 
-	const std::deque<Bus>& GetAllBuses() const { return buses_; }
+	const auto& GetDistanceContainer() const {
+		return distance_;
+	}
+	
+	const auto& GetNameToStop() const {
+		return name_to_stop_;
+	}
+
+	const std::deque<Bus>& GetAllBuses() const {
+		return buses_;
+	}
 
 	Bus* HasBus(const std::string_view bus_name) {
 		const auto bus = name_to_bus_.find(bus_name);
