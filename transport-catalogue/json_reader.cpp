@@ -94,7 +94,7 @@ inline void GetMapAnswr([[maybe_unused]] TransportCatalogue& catalogue, const Re
     .EndDict();
 }
 
-inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const Routing_settings &settings, const json::Dict &query, json::Builder &result, RouterBuilder& rb)
+inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const Routing_settings &settings, const json::Dict &query, json::Builder &result, const RouterBuilder& rb)
 {
     std::string_view from = query.at("from").AsString();
     std::string_view to = query.at("to").AsString();
@@ -121,12 +121,12 @@ inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const 
         // Заполнить Array с результата работы кода выше, Dict с действиями
         for (size_t edgeid : route->edges)
         {
-            EdgeInfo edge = rb.GetEdgeInfo(edgeid);
+            const EdgeInfo& edge = rb.GetEdgeInfo(edgeid);
             switch (edge.index())
             {
             case 0:
             {
-                BusEdgeInfo info = std::get<BusEdgeInfo>(edge);
+                const BusEdgeInfo& info = std::get<BusEdgeInfo>(edge);
                 result.StartDict()
                     .Key("type")
                     .Value("Bus")
@@ -141,7 +141,7 @@ inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const 
             }
             case 1:
             {
-                WaitEdgeInfo winfo = std::get<WaitEdgeInfo>(edge);
+                const WaitEdgeInfo& winfo = std::get<WaitEdgeInfo>(edge);
                 result.StartDict()
                     .Key("type")
                     .Value("Wait")
