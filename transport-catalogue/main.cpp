@@ -17,7 +17,7 @@ int main() {
     Routing_settings routing_settings;
 
     const auto querry = JSONToTransport(file, catalogue, render_settings, routing_settings);
-
+    {
     GetJSONAnswer(catalogue, render_settings, routing_settings, querry.GetRoot(), out);
-
+    }
 }

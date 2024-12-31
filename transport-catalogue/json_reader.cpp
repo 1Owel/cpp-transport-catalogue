@@ -163,7 +163,7 @@ void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderS
     using namespace std::literals;
     if (node.AsMap().at("stat_requests").AsArray().empty()) {return;}
     GraphBuilder gb(catalogue, routing_setting);
-    RouterBuilder rb(catalogue, gb.GetBuildedGraph(), gb.GetInfoAllEdges());
+    RouterBuilder rb(catalogue, gb.GetBuildedGraph(), gb.GetInfoAllEdges(), gb.GetNameToVertex());
 
     json::Builder result;
     result.StartArray();
