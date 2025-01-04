@@ -94,11 +94,11 @@ inline void GetMapAnswr([[maybe_unused]] TransportCatalogue& catalogue, const Re
     .EndDict();
 }
 
-inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const Routing_settings &settings, const json::Dict &query, json::Builder &result, const RouterBuilder& rb)
+inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const RoutingSettings &settings, const json::Dict &query, json::Builder &result, const RouteSearch& rs)
 {
     std::string_view from = query.at("from").AsString();
     std::string_view to = query.at("to").AsString();
-    auto route = rb.BuildRoute(from, to);
+    auto route = rs.BuildRoute(from, to);
 
     if (!route.has_value())
     {
@@ -119,9 +119,8 @@ inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const 
             .Key("items")
             .StartArray();
         // Заполнить Array с результата работы кода выше, Dict с действиями
-        for (size_t edgeid : route->edges)
+        for (auto edge : route->route)
         {
-            const EdgeInfo& edge = rb.GetEdgeInfo(edgeid);
             switch (edge.index())
             {
             case 0:
@@ -159,11 +158,10 @@ inline void GetRouteAnswr([[maybe_unused]] TransportCatalogue &catalogue, const 
 }
 
 // Выводит ответ на запрос в формате JSON
-void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& render_settings, const Routing_settings& routing_setting, const json::Node& node, std::ostream& out) {
+void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& render_settings, const RoutingSettings& routing_setting, const json::Node& node, std::ostream& out) {
     using namespace std::literals;
     if (node.AsMap().at("stat_requests").AsArray().empty()) {return;}
-    GraphBuilder gb(catalogue, routing_setting);
-    RouterBuilder rb(catalogue, gb.GetBuildedGraph(), gb.GetInfoAllEdges(), gb.GetNameToVertex());
+    RouteSearch rs(catalogue, routing_setting);
 
     json::Builder result;
     result.StartArray();
@@ -176,7 +174,7 @@ void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderS
         } else if (query.at("type").AsString() == "Map") {
             GetMapAnswr(catalogue, render_settings, query, result);
         } else if (query.at("type").AsString() == "Route") {
-            GetRouteAnswr(catalogue, routing_setting, query, result, rb);
+            GetRouteAnswr(catalogue, routing_setting, query, result, rs);
         }
     }
     result.EndArray();
@@ -245,7 +243,7 @@ void GetJSONRenderSettings(const json::Node& node, RenderSettings& settings) {
 }
 
 // Чтение параметров для поиска маршрута
-void GetJSONRouting_settings(const json::Node& node, Routing_settings& settings) {
+void GetJSONRouting_settings(const json::Node& node, RoutingSettings& settings) {
     const auto& routing_settings = node.AsMap().at("routing_settings").AsMap();
     settings.bus_velocity = routing_settings.at("bus_velocity").AsDouble();
     settings.bus_wait_time = routing_settings.at("bus_wait_time").AsInt();

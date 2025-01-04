@@ -14,10 +14,10 @@ int main() {
     ofstream out("out.svg");
 
     RenderSettings render_settings;
-    Routing_settings routing_settings;
+    RoutingSettings routing_settings;
 
     const auto querry = JSONToTransport(file, catalogue, render_settings, routing_settings);
-    {
+
     GetJSONAnswer(catalogue, render_settings, routing_settings, querry.GetRoot(), out);
-    }
+
 }

@@ -14,13 +14,13 @@
 
 void ApplyCommandsFromVariant([[maybe_unused]] TransportCatalogue& catalogue, const json::Node& node);
 
-void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& render_settings, const Routing_settings& routing_setting, const json::Node& node, std::ostream& out);
+void GetJSONAnswer([[maybe_unused]] TransportCatalogue& catalogue, const RenderSettings& render_settings, const RoutingSettings& routing_setting, const json::Node& node, std::ostream& out);
 
 void GetJSONRenderSettings(const json::Node& node, RenderSettings& settings);
 
-void GetJSONRouting_settings(const json::Node& node, Routing_settings& settings);
+void GetJSONRouting_settings(const json::Node& node, RoutingSettings& settings);
 
-inline json::Document JSONToTransport(std::istream& in, TransportCatalogue& catalogue, RenderSettings& settings, Routing_settings& routing_setting) {
+inline json::Document JSONToTransport(std::istream& in, TransportCatalogue& catalogue, RenderSettings& settings, RoutingSettings& routing_setting) {
     auto json_query = json::Load(in);
     GetJSONRenderSettings(json_query.GetRoot(), settings);
     GetJSONRouting_settings(json_query.GetRoot(), routing_setting);

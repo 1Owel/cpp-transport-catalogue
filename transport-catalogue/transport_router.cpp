@@ -1,5 +1,8 @@
 #include "transport_router.h"
 
+
+namespace TransportRouterInternals {
+
     // Рассчет времени между остановками / вес ребра
     template <typename RouteIterator>
     double GraphBuilder::ComputeTime(double bus_velocity, const RouteIterator& to) {
@@ -80,7 +83,7 @@
     }
 
     GraphBuilder::GraphBuilder(const TransportCatalogue& catalogue, 
-    const Routing_settings& settings) : catalogue_(catalogue),  graph_(2 * catalogue.GetNameToStop().size()) {
+    const RoutingSettings& settings) : catalogue_(catalogue),  graph_(2 * catalogue.GetNameToStop().size()) {
         const auto& name_to_stop = catalogue_.GetNameToStop();
         vortex_order.reserve(name_to_stop.size() * 2);
         edge_info_.reserve(name_to_stop.size() * 2);
@@ -116,5 +119,39 @@
             return router_.BuildRoute(from_index, to_index);
         } else {
             return std::optional<graph::Router<double>::RouteInfo>(std::nullopt);
+        }
+    }
+
+} // End of namespace TransportRouterInternals
+
+    std::optional<RouteResult>  RouteSearch::BuildRoute(std::string_view from, std::string_view to) const {
+        std::vector<EdgeInfo> route_result;
+        double result_weight;
+        auto edges = rb.BuildRoute(from, to);
+        if (!edges.has_value())
+        {
+            return std::nullopt;
+        }
+        else
+        {
+            result_weight = edges->weight;
+            for (size_t edgeid : edges->edges)
+            {
+                const EdgeInfo &edge = rb.GetEdgeInfo(edgeid);
+                switch (edge.index())
+                {
+                case 0:
+                {
+                    route_result.push_back(std::get<BusEdgeInfo>(edge));
+                    break;
+                }
+                case 1:
+                {
+                    route_result.push_back(std::get<WaitEdgeInfo>(edge));
+                    break;
+                }
+                }
+            }
+            return RouteResult{route_result, result_weight};
         }
     }
