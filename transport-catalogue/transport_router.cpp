@@ -70,16 +70,12 @@ namespace TransportRouterInternals {
             {
                 route.push_back(*i);
             }
+            return route;
         }
         else
         {
-            route.reserve(bus.route.size());
-            for (Stop *s : bus.route)
-            {
-                route.push_back(s);
-            }
+            return bus.route;
         }
-        return route;
     }
 
     GraphBuilder::GraphBuilder(const TransportCatalogue& catalogue, 
@@ -93,7 +89,7 @@ namespace TransportRouterInternals {
         // ---stops
         for (const Bus& bus : catalogue_.GetAllBuses()) {
             // Разворачивает маршрут если он не кольцевой
-            const std::vector<Stop*> route = RouteMaker(bus);
+            const std::vector<Stop*> route = RouteMaker(bus); // Пробовал делать проверку на кольцевой маршрут и в случае true использовать ссылку на него, получилось медленее
             for (auto from = route.begin(); from < route.end(); from++)
             {
                 // Возможное ускорение - переменная для времени здесь, ComputeTime находит только новую остановку (Последнюю)

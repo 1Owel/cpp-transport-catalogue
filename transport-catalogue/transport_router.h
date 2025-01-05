@@ -23,7 +23,7 @@ struct BusEdgeInfo {
     double time;
 };
 struct WaitEdgeInfo {
-    Stop* wait_place;
+    const Stop* wait_place;
 };
 using EdgeInfo = std::variant<BusEdgeInfo, WaitEdgeInfo>;
 
@@ -33,7 +33,6 @@ namespace TransportRouterInternals {
         
     class GraphBuilder
     {
-    friend RouteSearch;
     private:
         std::vector<Stop*> vortex_order;
         std::vector<EdgeInfo> edge_info_;
@@ -50,19 +49,19 @@ namespace TransportRouterInternals {
 
         std::vector<Stop*> RouteMaker(const Bus& bus);
 
-        graph::DirectedWeightedGraph<double>& GetBuildedGraph() {
+    public:
+        const graph::DirectedWeightedGraph<double>& GetBuildedGraph() {
             return graph_;
         }
 
-        std::vector<EdgeInfo>& GetInfoAllEdges() {
+        const std::vector<EdgeInfo>& GetInfoAllEdges() {
             return edge_info_;
         }
 
-        std::unordered_map<std::string_view, size_t>& GetNameToVertex() {
+        const std::unordered_map<std::string_view, size_t>& GetNameToVertex() {
             return name_to_vortex_index_;
         }
 
-    public:
         GraphBuilder(const TransportCatalogue& catalogue, 
         const RoutingSettings& settings);
 
@@ -72,12 +71,11 @@ namespace TransportRouterInternals {
 
     class RouterBuilder
     {
-    friend RouteSearch;
     public:
         RouterBuilder(const TransportCatalogue& catalogue,
-        graph::DirectedWeightedGraph<double>& grph,
-        std::vector<EdgeInfo>& edge_info,
-        std::unordered_map<std::string_view, size_t>& ntvi) 
+        const graph::DirectedWeightedGraph<double>& grph,
+        const std::vector<EdgeInfo>& edge_info,
+        const std::unordered_map<std::string_view, size_t>& ntvi) 
         : name_to_stop_(catalogue.GetNameToStop()), 
         edge_info_(edge_info),
         router_(grph), 
@@ -86,13 +84,13 @@ namespace TransportRouterInternals {
 
         ~RouterBuilder() = default;
 
-    private:
         std::optional<graph::Router<double>::RouteInfo> BuildRoute(std::string_view from, std::string_view to) const;
 
         const EdgeInfo& GetEdgeInfo(size_t edgeid) const {
             return edge_info_.at(edgeid);
         }
 
+        private:
         const std::unordered_map<std::string_view, Stop *>& name_to_stop_;
         const std::vector<EdgeInfo>& edge_info_;
         graph::Router<double> router_;
